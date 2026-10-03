@@ -49,7 +49,6 @@ public class HyperDirt {
             );
 
     public HyperDirt(IEventBus modEventBus) {
-        modEventBus.register(HyperDirtConfig.class);
         ITEMS.register(modEventBus);
         modEventBus.addListener(this::addCreative);
     }
