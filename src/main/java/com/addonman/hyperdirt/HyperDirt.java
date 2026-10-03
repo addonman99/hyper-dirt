@@ -145,4 +145,18 @@ public class HyperDirt {
             );
         }
     }
+    @Override
+    public boolean hurtEnemy(
+            ItemStack stack,
+            LivingEntity target,
+            LivingEntity attacker
+    ) {
+        if (attacker instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
+            HyperDirtNetwork.flash(serverPlayer);
+        }
+
+        return super.hurtEnemy(stack, target, attacker);
+    }
+
+
 }
