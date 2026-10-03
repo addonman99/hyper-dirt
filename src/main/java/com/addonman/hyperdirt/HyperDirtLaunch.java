@@ -35,15 +35,9 @@ public final class HyperDirtLaunch {
             return;
         }
 
-        Vec3 velocity = player.getDeltaMovement();
-
-        player.setDeltaMovement(
-            velocity.x,
-            UPWARD_VELOCITY,
-            velocity.z
-        );
-
+        player.push(0.0, UPWARD_VELOCITY, 0.0);
         player.hasImpulse = true;
+        player.hurtMarked = true;
 
         player.getCooldowns().addCooldown(
             stack.getItem(),
