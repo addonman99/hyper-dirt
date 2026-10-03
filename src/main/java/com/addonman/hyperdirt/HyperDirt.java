@@ -49,6 +49,7 @@ public class HyperDirt {
             );
 
     public HyperDirt(IEventBus modEventBus) {
+        modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.CLIENT, HyperDirtConfig.SPEC);
         ITEMS.register(modEventBus);
         modEventBus.addListener(this::addCreative);
     }

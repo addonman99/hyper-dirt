@@ -20,16 +20,19 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 )
 public final class HyperDirtEvents {
 
-    private static final String ACTIVE =
-            "HyperDirtRiptide";
+    private static final String DASH_ACTIVE =
+            "HyperDirtDash";
 
-    private static final String HIT =
-            "HyperDirtRiptideHit";
+    private static final String DASH_HIT =
+            "HyperDirtDashHit";
 
-    private static final double RADIUS =
+    private static final String DASH_TICKS =
+            "HyperDirtDashTicks";
+
+    private static final double EXPLOSION_RADIUS =
             4.0D;
 
-    private static final float MAX_DAMAGE =
+    private static final float EXPLOSION_DAMAGE =
             28.0F;
 
     private HyperDirtEvents() {}
@@ -37,41 +40,35 @@ public final class HyperDirtEvents {
     @SubscribeEvent
     public static void playerTick(PlayerTickEvent.Post event) {
 
-        Player player = event.getEntity();
+        Player player =
+                event.getEntity();
 
         if (player.level().isClientSide()) {
             return;
         }
 
-        boolean active =
+        if (!player.getPersistentData()
+                .getBoolean(DASH_ACTIVE)) {
+            return;
+        }
+
+        int ticks =
                 player.getPersistentData()
-                        .getBoolean(ACTIVE);
+                        .getInt(DASH_TICKS);
 
-        if (!active) {
+        if (ticks <= 0) {
+            stopDash(player);
             return;
         }
 
-        // Riptide has ended.
-        if (!player.isAutoSpinAttack()) {
-            player.getPersistentData()
-                    .putBoolean(ACTIVE, false);
+        player.getPersistentData()
+                .putInt(DASH_TICKS, ticks - 1);
 
-            player.getPersistentData()
-                    .putBoolean(HIT, false);
-
-            return;
-        }
-
-        // Already hit something during this Riptide.
         if (player.getPersistentData()
-                .getBoolean(HIT)) {
+                .getBoolean(DASH_HIT)) {
             return;
         }
 
-        /*
-         * Detect entities touching the player during
-         * the Riptide spin.
-         */
         AABB box =
                 player.getBoundingBox()
                         .inflate(0.9D);
@@ -92,7 +89,7 @@ public final class HyperDirtEvents {
             detonate(player, target);
 
             player.getPersistentData()
-                    .putBoolean(HIT, true);
+                    .putBoolean(DASH_HIT, true);
 
             break;
         }
@@ -109,14 +106,11 @@ public final class HyperDirtEvents {
         Vec3 pos =
                 impact.position();
 
-        // ----------------------------------------------------
-        // TNT-STYLE VISUAL
-        // ----------------------------------------------------
-
+        // TNT-style visual.
         level.sendParticles(
                 ParticleTypes.EXPLOSION_EMITTER,
                 pos.x,
-                pos.y + 0.4D,
+                pos.y + 0.35D,
                 pos.z,
                 1,
                 0.0D,
@@ -125,6 +119,7 @@ public final class HyperDirtEvents {
                 0.0D
         );
 
+        // Riptide-style impact sound.
         level.playSound(
                 null,
                 pos.x,
@@ -132,26 +127,22 @@ public final class HyperDirtEvents {
                 pos.z,
                 SoundEvents.GENERIC_EXPLODE,
                 SoundSource.BLOCKS,
-                1.8F,
-                0.85F
-                        + level.random.nextFloat()
-                        * 0.15F
+                1.9F,
+                0.9F
         );
-
-        // ----------------------------------------------------
-        // ENTITY-ONLY DAMAGE
-        // ----------------------------------------------------
 
         AABB damageBox =
                 new AABB(
-                        pos.x - RADIUS,
-                        pos.y - RADIUS,
-                        pos.z - RADIUS,
-                        pos.x + RADIUS,
-                        pos.y + RADIUS,
-                        pos.z + RADIUS
+                        pos.x - EXPLOSION_RADIUS,
+                        pos.y - EXPLOSION_RADIUS,
+                        pos.z - EXPLOSION_RADIUS,
+                        pos.x + EXPLOSION_RADIUS,
+                        pos.y + EXPLOSION_RADIUS,
+                        pos.z + EXPLOSION_RADIUS
                 );
 
+        // IMPORTANT:
+        // attacker is explicitly excluded.
         for (Entity entity :
                 level.getEntities(
                         attacker,
@@ -171,21 +162,18 @@ public final class HyperDirtEvents {
             double scale =
                     Math.max(
                             0.15D,
-                            1.0D
-                                    - Math.min(
-                                            distance / RADIUS,
+                            1.0D -
+                                    Math.min(
+                                            distance /
+                                                    EXPLOSION_RADIUS,
                                             1.0D
                                     )
                     );
 
             float damage =
-                    (float)(MAX_DAMAGE * scale);
+                    (float)
+                            (EXPLOSION_DAMAGE * scale);
 
-            /*
-             * IMPORTANT:
-             * attacker is excluded from the entity query,
-             * so the custom explosion cannot hurt its owner.
-             */
             target.hurt(
                     attacker.damageSources()
                             .explosion(
@@ -199,7 +187,9 @@ public final class HyperDirtEvents {
                     target.position()
                             .subtract(pos);
 
-            if (direction.lengthSqr() > 0.0001D) {
+            if (direction.lengthSqr() >
+                    0.0001D) {
+
                 direction =
                         direction.normalize();
             } else {
@@ -208,35 +198,41 @@ public final class HyperDirtEvents {
             }
 
             target.push(
-                    direction.x
-                            * 1.6D
-                            * scale,
-
-                    0.75D * scale,
-
-                    direction.z
-                            * 1.6D
-                            * scale
+                    direction.x * 1.7D * scale,
+                    0.8D * scale,
+                    direction.z * 1.7D * scale
             );
 
             target.hurtMarked = true;
         }
-
-        // ----------------------------------------------------
-        // ATTACKER GETS THE RED HIT FLASH ONLY
-        // ----------------------------------------------------
 
         if (attacker instanceof ServerPlayer serverPlayer) {
             HyperDirtNetwork.flash(serverPlayer);
         }
     }
 
-    public static void beginRiptide(Player player) {
+    public static void beginDash(Player player) {
 
         player.getPersistentData()
-                .putBoolean(ACTIVE, true);
+                .putBoolean(DASH_ACTIVE, true);
 
         player.getPersistentData()
-                .putBoolean(HIT, false);
+                .putBoolean(DASH_HIT, false);
+
+        // 12 ticks of collision detection.
+        player.getPersistentData()
+                .putInt(DASH_TICKS, 12);
+    }
+
+    private static void stopDash(Player player) {
+
+        player.getPersistentData()
+                .putBoolean(DASH_ACTIVE, false);
+
+        player.getPersistentData()
+                .putBoolean(DASH_HIT, false);
+
+        player.getPersistentData()
+                .putInt(DASH_TICKS, 0);
     }
 }
