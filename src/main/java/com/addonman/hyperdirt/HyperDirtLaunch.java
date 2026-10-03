@@ -27,7 +27,7 @@ public final class HyperDirtLaunch {
 
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
 
-        if (!new ResourceLocation(HyperDirt.MOD_ID, "hyper_dirt").equals(id)) {
+        if (!ResourceLocation.fromNamespaceAndPath(HyperDirt.MOD_ID, "hyper_dirt").equals(id)) {
             return;
         }
 
