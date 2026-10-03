@@ -43,5 +43,13 @@ public final class HyperDirtNetwork {
         PacketDistributor.sendToPlayer(player, new FX(kind));
     }
 
+    public static void flash(ServerPlayer player) {
+        send(player, 1);
+    }
+
+    public static void impact(ServerPlayer player) {
+        send(player, 2);
+    }
+
     private HyperDirtNetwork() {}
 }

@@ -20,6 +20,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -49,7 +50,7 @@ public class HyperDirt {
             );
 
     public HyperDirt(IEventBus modEventBus) {
-        modContainer.registerConfig(net.neoforged.fml.config.ModConfig.Type.CLIENT, HyperDirtConfig.SPEC);
+        modEventBus.register(HyperDirtConfig.class);
         ITEMS.register(modEventBus);
         modEventBus.addListener(this::addCreative);
     }
