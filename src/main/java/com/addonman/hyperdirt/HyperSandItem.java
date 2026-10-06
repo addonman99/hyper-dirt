@@ -12,8 +12,8 @@ public class HyperSandItem extends Item {
 
     private static final int COOLDOWN_TICKS = 4;
 
-    public HyperSandItem() {
-        super(new Item.Properties().durability(5000));
+    public HyperSandItem(Item.Properties properties) {
+        super(properties.durability(5000));
     }
 
     @Override
