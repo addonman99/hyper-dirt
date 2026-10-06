@@ -1,6 +1,5 @@
 package com.addonman.hyperdirt;
 
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,7 +20,7 @@ public final class HyperSandClient {
     ) {
         event.registerEntityRenderer(
                 HyperSandRegistration.HYPER_SAND_PROJECTILE,
-                ThrownItemRenderer::new
+                HyperSandRenderer::new
         );
     }
 }

@@ -1,16 +1,15 @@
 package com.addonman.hyperdirt;
 
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ItemSupplier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class HyperSandProjectile extends Entity implements ItemSupplier {
+public class HyperSandProjectile extends Entity {
 
     private static final double DISTANCE = 8.0;
     private static final double ARC_HEIGHT = 2.5;
@@ -31,6 +30,10 @@ public class HyperSandProjectile extends Entity implements ItemSupplier {
         setNoGravity(true);
     }
 
+    public ItemStack getItem() {
+        return item;
+    }
+
     public void setPath(Vec3 start, Vec3 look) {
         this.start = start;
 
@@ -44,8 +47,8 @@ public class HyperSandProjectile extends Entity implements ItemSupplier {
             horizontal = new Vec3(0, 0, 1);
         }
 
-        this.direction = horizontal.normalize();
-        this.setPos(start);
+        direction = horizontal.normalize();
+        setPos(start);
     }
 
     @Override
@@ -74,16 +77,11 @@ public class HyperSandProjectile extends Entity implements ItemSupplier {
         double forward = DISTANCE * t;
         double height = Math.sin(Math.PI * t) * ARC_HEIGHT;
 
-        double x = start.x + direction.x * forward;
-        double y = start.y + height;
-        double z = start.z + direction.z * forward;
-
-        setPos(x, y, z);
-    }
-
-    @Override
-    public ItemStack getItem() {
-        return item;
+        setPos(
+                start.x + direction.x * forward,
+                start.y + height,
+                start.z + direction.z * forward
+        );
     }
 
     @Override
