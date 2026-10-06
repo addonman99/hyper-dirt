@@ -39,7 +39,7 @@ public class HyperSandItem extends Item {
 
             HyperSandProjectile projectile =
                     new HyperSandProjectile(
-                            HyperSandRegistration.HYPER_SAND_PROJECTILE,
+                            HyperSandRegistration.HYPER_SAND_PROJECTILE.get(),
                             level
                     );
 

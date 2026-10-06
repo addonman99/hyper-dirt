@@ -19,7 +19,7 @@ public final class HyperSandClient {
             EntityRenderersEvent.RegisterRenderers event
     ) {
         event.registerEntityRenderer(
-                HyperSandRegistration.HYPER_SAND_PROJECTILE,
+                HyperSandRegistration.HYPER_SAND_PROJECTILE.get(),
                 HyperSandRenderer::new
         );
     }
